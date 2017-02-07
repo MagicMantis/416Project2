@@ -2,15 +2,18 @@
 // Also need to install libsdl2-image-dev
 
 #include <iostream>
+#include <cstdlib>
 #include <SDL.h>
 #include <SDL2/SDL_image.h>
-#include "frameGenerator.h"
+#include <vector>
+#include "rain.h"
+//#include "frameGenerator.h"
 
 const int X_POS = 10;
 const int Y_POS = 10;
 const float X_VEL = 150.0;
 const float Y_VEL = 150.0;
-const int rain_count = 100;
+const int rain_count = 200;
 
 // Approximately 60 frames per second: 60/1000
 const unsigned int DT = 17u; // ***
@@ -29,17 +32,22 @@ SDL_Texture* getTexture(SDL_Renderer* rend, const std::string& filename) {
   }
 }
 
-void initGameObjects(vector<GameObject*> gameObjects) {
+void initGameObjects(std::vector<GameObject*>& gameObjects) {
 	for (int i = 0; i < rain_count; i++) {
-		gameObjects.push_back(new Rain(i*2, -10, 5, 1, 1));
+		gameObjects.push_back(new Rain(i*(WIDTH/rain_count), -(rand()%HEIGHT), rand()%5+6, HEIGHT, 3));
 	}
 }
 
 void draw(SDL_Renderer* rend, SDL_Texture* back, SDL_Texture* star,
-          const SDL_Rect& dstrect) {
+          const SDL_Rect& dstrect, std::vector<GameObject*>& gameObjects) {
   SDL_RenderClear(rend);
+
   SDL_RenderCopy(rend, back, NULL, NULL);
   SDL_RenderCopy(rend, star, NULL, &dstrect);
+
+  for ( size_t   i = 0; i < gameObjects.size(); i++ ) {
+    gameObjects[i]->draw(rend);
+  }
   SDL_RenderPresent(rend);
 }
 
@@ -47,7 +55,8 @@ inline float clamp(const float val, const float lo, const float hi){
   return val <= lo ? lo : ( val >= hi ? hi : val);
 }
 
-void update(SDL_Rect& dstrect, FrameGenerator& frameGen, bool makeVideo) {
+void update(SDL_Rect& dstrect, FrameGenerator& frameGen, bool makeVideo, 
+    std::vector<GameObject*>& gameObjects) {
   static float x = X_POS;
   static float y = Y_POS;
 
@@ -73,6 +82,10 @@ void update(SDL_Rect& dstrect, FrameGenerator& frameGen, bool makeVideo) {
 
   dstrect.x = x;
   dstrect.y = y;
+
+  for ( size_t i = 0; i < gameObjects.size(); i++ ) {
+    gameObjects[i]->update();
+  }
 }
 
 int main( ) {
@@ -85,7 +98,7 @@ int main( ) {
   SDL_Renderer *renderer = 
     SDL_CreateRenderer(window, -1, SDL_RENDERER_PRESENTVSYNC);
 
-  SDL_Texture *background = getTexture(renderer, "images/axis.png");
+  SDL_Texture *background = getTexture(renderer, "images/bkgnd.png");
   SDL_Texture *yellowstar = getTexture(renderer, "images/yellowstar.png");
 
   SDL_Event event;
@@ -96,7 +109,7 @@ int main( ) {
   bool done = false;
   FrameGenerator frameGen(renderer, window);
 
-  vector<GameObject*> gameObjects;
+  std::vector<GameObject*> gameObjects;
   initGameObjects(gameObjects);
 
   while ( !done ) {
@@ -113,8 +126,8 @@ int main( ) {
       }
     }
 
-    draw(renderer, background, yellowstar, dstrect);
-    update(dstrect, frameGen, makeVideo);
+    draw(renderer, background, yellowstar, dstrect, gameObjects);
+    update(dstrect, frameGen, makeVideo, gameObjects);
   }
 
   SDL_DestroyTexture(yellowstar);

@@ -1,9 +1,9 @@
 #include <string>
 #include <SDL.h>
 
-const int WIDTH  = 700;
-const int HEIGHT = 394;
-const std::string USERNAME = "malloy";
+const int WIDTH  = 640;
+const int HEIGHT = 480;
+const std::string USERNAME = "jsavold";
 const int unsigned MAX_FRAMES = 300;
 
 

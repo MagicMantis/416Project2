@@ -8,7 +8,7 @@ public:
 		x(xp), y(yp), length(len), wrap(w), speed((float) len / 10.0f * s) {}
 	~Rain();
 
-	void update();
+	void update(int stage);
 	void draw(SDL_Renderer* render);
 private:
 	float x, y;

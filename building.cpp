@@ -1,11 +1,10 @@
-#include <iostream>
 #include "building.h"
 
-void Building::update() {
-
+void Building::update(int stage) {
+	if (stage == 0) x -= 7*scale;
 }
 
 void Building::draw(SDL_Renderer* render) {
-	SDL_Rect dstrect = {x, y, 200*scale, 400*scale};
-	SDL_RenderCopy(render, img, NULL, &dstrect);
+	SDL_Rect dstrect = {x, y, texture->getWidth()*scale, texture->getHeight()*scale};
+	SDL_RenderCopy(render, texture->getImage(), NULL, &dstrect);
 }

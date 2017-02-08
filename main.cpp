@@ -8,12 +8,10 @@
 #include <vector>
 #include "rain.h"
 #include "building.h"
+#include "texture.h"
+#include "detective.h"
 //#include "frameGenerator.h"
 
-const int X_POS = 10;
-const int Y_POS = 10;
-const float X_VEL = 150.0;
-const float Y_VEL = 150.0;
 const int rain_count = 200;
 
 // Approximately 60 frames per second: 60/1000
@@ -33,35 +31,52 @@ SDL_Texture* getTexture(SDL_Renderer* rend, const std::string& filename) {
   }
 }
 
-void initGameObjects(std::vector<GameObject*>& gameObjects, SDL_Texture* b1, SDL_Texture* b2) {
-  gameObjects.push_back(new Building(100,100,1,b1));
-  gameObjects.push_back(new Building(300,-50,.5,b2));
+void initGameObjects(std::vector<GameObject*>& gameObjects, 
+    Texture* b1, Texture* b2, Texture* roof, Texture* d) {
+
+  for (int i = 0; i < rain_count; i++) {
+    gameObjects.push_back(new Rain(i*(WIDTH/rain_count), (rand()%HEIGHT), rand()%3+3, HEIGHT, 5));
+  }
+
+  //create buildings
+  gameObjects.push_back(new Building(400,250,.7,b1));
+  gameObjects.push_back(new Building(670,200,.9,b2));
+  gameObjects.push_back(new Building(1000,250,.8,b1));
+  gameObjects.push_back(new Building(1100,370,.5,b2));
+  gameObjects.push_back(new Building(1100,200,.5,b2));
+
+  //create back ground rain drops
+  for (int i = 0; i < rain_count; i++) {
+    gameObjects.push_back(new Rain(i*(WIDTH/rain_count), (rand()%HEIGHT), rand()%3+6, HEIGHT, 4));
+  }
+
+  gameObjects.push_back(new Building(1250,100,1,roof));
+
+  gameObjects.push_back(new Detective(1400,370,d));
+
+  //create raindrops
 	for (int i = 0; i < rain_count; i++) {
-		gameObjects.push_back(new Rain(i*(WIDTH/rain_count), -(rand()%HEIGHT), rand()%5+6, HEIGHT, 3));
+		gameObjects.push_back(new Rain(i*(WIDTH/rain_count), (rand()%HEIGHT), rand()%2+9, HEIGHT, 4));
 	}
 }
 
-void draw(SDL_Renderer* rend, SDL_Texture* back, SDL_Texture* star,
-          const SDL_Rect& dstrect, std::vector<GameObject*>& gameObjects) {
+void draw(SDL_Renderer* rend, SDL_Texture* back, std::vector<GameObject*>& gameObjects) {
   SDL_RenderClear(rend);
 
+  //draw background
   SDL_RenderCopy(rend, back, NULL, NULL);
-  SDL_RenderCopy(rend, star, NULL, &dstrect);
 
+  //call draw() for all game objects
   for ( size_t   i = 0; i < gameObjects.size(); i++ ) {
     gameObjects[i]->draw(rend);
   }
+
+  //render results
   SDL_RenderPresent(rend);
 }
 
-inline float clamp(const float val, const float lo, const float hi){
-  return val <= lo ? lo : ( val >= hi ? hi : val);
-}
-
-void update(SDL_Rect& dstrect, FrameGenerator& frameGen, bool makeVideo, 
-    std::vector<GameObject*>& gameObjects) {
-  static float x = X_POS;
-  static float y = Y_POS;
+void update(FrameGenerator& frameGen, bool makeVideo, 
+    std::vector<GameObject*>& gameObjects, int stage) {
 
   static unsigned int remainder = 0u; // ***
   static unsigned int prevTicks = SDL_GetTicks();
@@ -73,21 +88,12 @@ void update(SDL_Rect& dstrect, FrameGenerator& frameGen, bool makeVideo,
   // Generate a frame:
   if ( makeVideo ) frameGen.makeFrame();
 
-  float dx = X_VEL * DT * 0.001;
-  x += dx;
-  float dy = Y_VEL * DT * 0.001;
-  y += dy;
-  x = clamp(x,0.f,WIDTH-dstrect.w);
-  y = clamp(y,0.f,HEIGHT-dstrect.h);
-
   prevTicks = currentTicks;
   remainder = elapsedTicks - DT; // ***
 
-  dstrect.x = x;
-  dstrect.y = y;
-
+  //update all game objects
   for ( size_t i = 0; i < gameObjects.size(); i++ ) {
-    gameObjects[i]->update();
+    gameObjects[i]->update(stage);
   }
 }
 
@@ -96,26 +102,34 @@ int main( ) {
   SDL_Init(SDL_INIT_VIDEO);
 
   SDL_Window *window = 
-    SDL_CreateWindow("Star Animation", posX, posY, WIDTH, HEIGHT, 0);
+    SDL_CreateWindow("The Chase", posX, posY, WIDTH, HEIGHT, 0);
 
   SDL_Renderer *renderer = 
     SDL_CreateRenderer(window, -1, SDL_RENDERER_PRESENTVSYNC);
 
+  //load textures
   SDL_Texture *background = getTexture(renderer, "images/bkgnd.png");
-  SDL_Texture *yellowstar = getTexture(renderer, "images/yellowstar.png");
   SDL_Texture *building1 = getTexture(renderer, "images/building1.png");
   SDL_Texture *building2 = getTexture(renderer, "images/building2.png");
+  SDL_Texture *rooftop = getTexture(renderer, "images/rooftop.png");
+  SDL_Texture *detective = getTexture(renderer, "images/detective.png");
+
+  //create texture wrappers
+  Texture *b1 = new Texture(building1, 300, 450);
+  Texture *b2 = new Texture(building2, 300, 450);
+  Texture *roof = new Texture(rooftop, 640, 400);
+  Texture *d = new Texture(detective, 32, 64);
 
   SDL_Event event;
   const Uint8* keystate;
   int nKeys=-1;
-  SDL_Rect dstrect = {X_POS, Y_POS, 32, 32};
   bool makeVideo = false;
   bool done = false;
   FrameGenerator frameGen(renderer, window);
 
   std::vector<GameObject*> gameObjects;
-  initGameObjects(gameObjects,building1,building2);
+  initGameObjects(gameObjects,b1,b2,roof,d);
+  int stage = 0, counter = 0;
 
   while ( !done ) {
     while ( SDL_PollEvent(&event)) {
@@ -131,15 +145,27 @@ int main( ) {
       }
     }
 
-    draw(renderer, background, yellowstar, dstrect, gameObjects);
-    update(dstrect, frameGen, makeVideo, gameObjects);
+    //update game state
+    switch (stage) {
+      case 0: if (counter > 180) { stage++; counter = 0; } break;
+      case 1: if (counter > 100) { stage++; counter = 0; } break;
+    }
+    counter++;
+
+    draw(renderer, background, gameObjects);
+    update(frameGen, makeVideo, gameObjects, stage);
   }
 
-  SDL_DestroyTexture(yellowstar);
+  //cleanup
+  for (size_t i = 0; i < gameObjects.size(); i++) {
+    delete gameObjects[i];
+  }
   SDL_DestroyTexture(background);
-  SDL_DestroyTexture(building1);
-  SDL_DestroyTexture(building2);
-  SDL_DestroyRenderer(renderer);
+  delete b1;
+  delete b2;
+  delete roof;
+  delete d;
+
   SDL_DestroyWindow(window);
   SDL_Quit();
 }

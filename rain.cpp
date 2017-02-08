@@ -1,10 +1,11 @@
 #include <iostream>
 #include "rain.h"
 
-void Rain::update() {
+void Rain::update(int stage) {
 	y += speed;
 	if (y > wrap) y = -length;
-	x -= speed/10;
+	if (stage == 0) x -= speed;
+	else x -= speed/10;
 	if (x < 0) x += WIDTH;
 }
 

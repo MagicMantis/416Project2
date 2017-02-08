@@ -7,6 +7,7 @@
 #include <SDL2/SDL_image.h>
 #include <vector>
 #include "rain.h"
+#include "building.h"
 //#include "frameGenerator.h"
 
 const int X_POS = 10;
@@ -32,7 +33,9 @@ SDL_Texture* getTexture(SDL_Renderer* rend, const std::string& filename) {
   }
 }
 
-void initGameObjects(std::vector<GameObject*>& gameObjects) {
+void initGameObjects(std::vector<GameObject*>& gameObjects, SDL_Texture* b1, SDL_Texture* b2) {
+  gameObjects.push_back(new Building(100,100,1,b1));
+  gameObjects.push_back(new Building(300,-50,.5,b2));
 	for (int i = 0; i < rain_count; i++) {
 		gameObjects.push_back(new Rain(i*(WIDTH/rain_count), -(rand()%HEIGHT), rand()%5+6, HEIGHT, 3));
 	}
@@ -100,6 +103,8 @@ int main( ) {
 
   SDL_Texture *background = getTexture(renderer, "images/bkgnd.png");
   SDL_Texture *yellowstar = getTexture(renderer, "images/yellowstar.png");
+  SDL_Texture *building1 = getTexture(renderer, "images/building1.png");
+  SDL_Texture *building2 = getTexture(renderer, "images/building2.png");
 
   SDL_Event event;
   const Uint8* keystate;
@@ -110,7 +115,7 @@ int main( ) {
   FrameGenerator frameGen(renderer, window);
 
   std::vector<GameObject*> gameObjects;
-  initGameObjects(gameObjects);
+  initGameObjects(gameObjects,building1,building2);
 
   while ( !done ) {
     while ( SDL_PollEvent(&event)) {
@@ -132,6 +137,8 @@ int main( ) {
 
   SDL_DestroyTexture(yellowstar);
   SDL_DestroyTexture(background);
+  SDL_DestroyTexture(building1);
+  SDL_DestroyTexture(building2);
   SDL_DestroyRenderer(renderer);
   SDL_DestroyWindow(window);
   SDL_Quit();

@@ -2,9 +2,9 @@
 
 CFLAGS=`sdl2-config --cflags` -g -W -Wall -Weffc++ -Wextra -pedantic -O0 -I `sdl2-config --prefix`/include/
 SDL_LIB=`sdl2-config --libs` -lSDL2_image
-CCC=g++
+CCC=clang++
 
-OBJECTS = frameGenerator.o gameObject.o rain.o
+OBJECTS = frameGenerator.o gameObject.o rain.o building.o
 
 run: main.o $(OBJECTS)
 	$(CCC) $(CFLAGS) main.cpp -o run $(OBJECTS) $(SDL_LIB)
@@ -20,6 +20,9 @@ gameObject.o: gameObject.cpp gameObject.h
 
 rain.o: rain.cpp rain.h gameObject.h
 	$(CCC) $(CFLAGS) -c rain.cpp
+
+building.o: building.cpp building.h gameObject.h
+	$(CCC) $(CFLAGS) -c building.cpp
 
 clean:
 	rm -f run *.o

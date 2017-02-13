@@ -17,5 +17,5 @@ void Rain::draw(SDL_Renderer* render) {
 }
 
 Rain::~Rain() {
-	std::cout << "Rain Destructor" << std::endl;
+	
 }

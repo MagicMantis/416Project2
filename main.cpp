@@ -10,6 +10,9 @@
 #include "building.h"
 #include "texture.h"
 #include "detective.h"
+#include "criminal.h"
+#include "stageObject.h"
+#include "lightning.h"
 //#include "frameGenerator.h"
 
 const int rain_count = 200;
@@ -31,33 +34,37 @@ SDL_Texture* getTexture(SDL_Renderer* rend, const std::string& filename) {
   }
 }
 
-void initGameObjects(std::vector<GameObject*>& gameObjects, 
-    Texture* b1, Texture* b2, Texture* roof, Texture* d) {
+void initGameObjects(std::vector<GameObject*>& gameObjects, Texture** textures) {
 
-  for (int i = 0; i < rain_count; i++) {
+  for (int i = 0; i < rain_count*2; i++) {
     gameObjects.push_back(new Rain(i*(WIDTH/rain_count), (rand()%HEIGHT), rand()%3+3, HEIGHT, 5));
   }
 
   //create buildings
-  gameObjects.push_back(new Building(400,250,.7,b1));
-  gameObjects.push_back(new Building(670,200,.9,b2));
-  gameObjects.push_back(new Building(1000,250,.8,b1));
-  gameObjects.push_back(new Building(1100,370,.5,b2));
-  gameObjects.push_back(new Building(1100,200,.5,b2));
+  gameObjects.push_back(new Building(400,250,.7,textures[0]));
+  gameObjects.push_back(new Building(670,200,.9,textures[1]));
+  gameObjects.push_back(new Building(1000,250,.8,textures[0]));
+  gameObjects.push_back(new Building(1100,370,.5,textures[1]));
+  gameObjects.push_back(new Building(1100,200,.5,textures[1]));
 
   //create back ground rain drops
   for (int i = 0; i < rain_count; i++) {
     gameObjects.push_back(new Rain(i*(WIDTH/rain_count), (rand()%HEIGHT), rand()%3+6, HEIGHT, 4));
   }
 
-  gameObjects.push_back(new Building(1250,100,1,roof));
+  gameObjects.push_back(new Building(1250,100,1,textures[2]));
 
-  gameObjects.push_back(new Detective(1400,370,d));
+  gameObjects.push_back(new Detective(1400,370,textures[3]));
+  gameObjects.push_back(new Criminal(1680,370,textures[4]));
 
   //create raindrops
 	for (int i = 0; i < rain_count; i++) {
 		gameObjects.push_back(new Rain(i*(WIDTH/rain_count), (rand()%HEIGHT), rand()%2+9, HEIGHT, 4));
 	}
+
+  gameObjects.push_back(new StageObject(0,0,500,100,1,textures[5]));
+  gameObjects.push_back(new StageObject(0,0,500,100,3,textures[6]));
+  gameObjects.push_back(new Lightning(300,-70,300,300,5,textures[7]));
 }
 
 void draw(SDL_Renderer* rend, SDL_Texture* back, std::vector<GameObject*>& gameObjects) {
@@ -113,12 +120,21 @@ int main( ) {
   SDL_Texture *building2 = getTexture(renderer, "images/building2.png");
   SDL_Texture *rooftop = getTexture(renderer, "images/rooftop.png");
   SDL_Texture *detective = getTexture(renderer, "images/detective.png");
+  SDL_Texture *criminal = getTexture(renderer, "images/criminal.png");
+  SDL_Texture *dtext = getTexture(renderer, "images/dtext.png");
+  SDL_Texture *ctext = getTexture(renderer, "images/ctext.png");
+  SDL_Texture *lightning = getTexture(renderer, "images/lightning.png");
 
   //create texture wrappers
-  Texture *b1 = new Texture(building1, 300, 450);
-  Texture *b2 = new Texture(building2, 300, 450);
-  Texture *roof = new Texture(rooftop, 640, 400);
-  Texture *d = new Texture(detective, 32, 64);
+  Texture* textures[10];
+  textures[0] = new Texture(building1, 300, 450);
+  textures[1] = new Texture(building2, 300, 450);
+  textures[2] = new Texture(rooftop, 640, 400);
+  textures[3] = new Texture(detective, 32, 64);
+  textures[4] = new Texture(criminal, 32, 64);
+  textures[5] = new Texture(dtext, 640, 100);
+  textures[6] = new Texture(ctext, 640, 100);
+  textures[7] = new Texture(lightning, 300, 300);
 
   SDL_Event event;
   const Uint8* keystate;
@@ -128,7 +144,7 @@ int main( ) {
   FrameGenerator frameGen(renderer, window);
 
   std::vector<GameObject*> gameObjects;
-  initGameObjects(gameObjects,b1,b2,roof,d);
+  initGameObjects(gameObjects,textures);
   int stage = 0, counter = 0;
 
   while ( !done ) {
@@ -149,6 +165,10 @@ int main( ) {
     switch (stage) {
       case 0: if (counter > 180) { stage++; counter = 0; } break;
       case 1: if (counter > 100) { stage++; counter = 0; } break;
+      case 2: if (counter > 60) { stage++; counter = 0; } break;
+      case 3: if (counter > 100) { stage++; counter = 0; } break;
+      case 4: if (counter > 140) { stage++; counter = 0; } break;
+      case 5: if (counter > 35) { stage++; counter = 0; } break;
     }
     counter++;
 
@@ -161,10 +181,9 @@ int main( ) {
     delete gameObjects[i];
   }
   SDL_DestroyTexture(background);
-  delete b1;
-  delete b2;
-  delete roof;
-  delete d;
+  for (int i = 0; i < 8; i++) {
+    delete textures[i];
+  }
 
   SDL_DestroyWindow(window);
   SDL_Quit();

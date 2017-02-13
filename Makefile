@@ -4,7 +4,8 @@ CFLAGS=`sdl2-config --cflags` -g -W -Wall -Weffc++ -Wextra -pedantic -O0 -I `sdl
 SDL_LIB=`sdl2-config --libs` -lSDL2_image
 CCC=clang++
 
-OBJECTS = frameGenerator.o gameObject.o rain.o building.o detective.o
+OBJECTS = frameGenerator.o gameObject.o rain.o building.o detective.o criminal.o \
+stageObject.o lightning.o
 
 run: main.o $(OBJECTS)
 	$(CCC) $(CFLAGS) main.cpp -o run $(OBJECTS) $(SDL_LIB)
@@ -26,6 +27,15 @@ building.o: building.cpp building.h gameObject.h
 	
 detective.o: detective.cpp detective.h gameObject.h
 	$(CCC) $(CFLAGS) -c detective.cpp
+
+criminal.o: criminal.cpp criminal.h gameObject.h
+	$(CCC) $(CFLAGS) -c criminal.cpp
+
+stageObject.o: stageObject.cpp stageObject.h gameObject.h
+	$(CCC) $(CFLAGS) -c stageObject.cpp
+
+lightning.o: lightning.cpp lightning.h
+	$(CCC) $(CFLAGS) -c lightning.cpp
 
 clean:
 	rm -f run *.o

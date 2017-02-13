@@ -13,6 +13,7 @@
 #include "criminal.h"
 #include "stageObject.h"
 #include "lightning.h"
+#include "fadeout.h"
 //#include "frameGenerator.h"
 
 const int rain_count = 200;
@@ -52,19 +53,25 @@ void initGameObjects(std::vector<GameObject*>& gameObjects, Texture** textures) 
     gameObjects.push_back(new Rain(i*(WIDTH/rain_count), (rand()%HEIGHT), rand()%3+6, HEIGHT, 4));
   }
 
+  //create rooftop
   gameObjects.push_back(new Building(1250,100,1,textures[2]));
 
+  //create characters
   gameObjects.push_back(new Detective(1400,370,textures[3]));
-  gameObjects.push_back(new Criminal(1680,370,textures[4]));
+  gameObjects.push_back(new Criminal(1650,370,textures[4]));
 
   //create raindrops
 	for (int i = 0; i < rain_count; i++) {
 		gameObjects.push_back(new Rain(i*(WIDTH/rain_count), (rand()%HEIGHT), rand()%2+9, HEIGHT, 4));
 	}
 
+  //create text and lightning effects
   gameObjects.push_back(new StageObject(0,0,500,100,1,textures[5]));
   gameObjects.push_back(new StageObject(0,0,500,100,3,textures[6]));
   gameObjects.push_back(new Lightning(300,-70,300,300,5,textures[7]));
+
+  //create fadeout object
+  gameObjects.push_back(new FadeOut(0,0,640,480,8));
 }
 
 void draw(SDL_Renderer* rend, SDL_Texture* back, std::vector<GameObject*>& gameObjects) {
@@ -131,7 +138,7 @@ int main( ) {
   textures[1] = new Texture(building2, 300, 450);
   textures[2] = new Texture(rooftop, 640, 400);
   textures[3] = new Texture(detective, 32, 64);
-  textures[4] = new Texture(criminal, 32, 64);
+  textures[4] = new Texture(criminal, 128, 64);
   textures[5] = new Texture(dtext, 640, 100);
   textures[6] = new Texture(ctext, 640, 100);
   textures[7] = new Texture(lightning, 300, 300);
@@ -169,6 +176,8 @@ int main( ) {
       case 3: if (counter > 100) { stage++; counter = 0; } break;
       case 4: if (counter > 140) { stage++; counter = 0; } break;
       case 5: if (counter > 35) { stage++; counter = 0; } break;
+      case 6: if (counter > 75) { stage++; counter = 0; } break;
+      case 7: if (counter > 10) { stage++; counter = 0; } break;
     }
     counter++;
 

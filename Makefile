@@ -5,7 +5,7 @@ SDL_LIB=`sdl2-config --libs` -lSDL2_image
 CCC=clang++
 
 OBJECTS = frameGenerator.o gameObject.o rain.o building.o detective.o criminal.o \
-stageObject.o lightning.o fadeout.o
+stageObject.o lightning.o fadeout.o textureManager.o
 
 run: main.o $(OBJECTS)
 	$(CCC) $(CFLAGS) main.cpp -o run $(OBJECTS) $(SDL_LIB)
@@ -18,6 +18,9 @@ frameGenerator.o: frameGenerator.cpp frameGenerator.h
 
 gameObject.o: gameObject.cpp gameObject.h
 	$(CCC) $(CFLAGS) -c gameObject.cpp
+
+textureManager.o: textureManager.cpp textureManager.h
+	$(CCC) $(CFLAGS) -c textureManager.cpp
 
 rain.o: rain.cpp rain.h gameObject.h
 	$(CCC) $(CFLAGS) -c rain.cpp

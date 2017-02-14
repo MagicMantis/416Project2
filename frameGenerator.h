@@ -1,3 +1,6 @@
+#ifndef FRAMEGEN_H
+#define FRAMEGEN_H
+
 #include <string>
 #include <SDL.h>
 
@@ -22,3 +25,5 @@ private:
   FrameGenerator(const FrameGenerator&);
   FrameGenerator& operator=(const FrameGenerator&);
 };
+
+#endif

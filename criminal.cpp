@@ -4,7 +4,7 @@ void Criminal::update(int stage) {
 	if (stage == 0) {
 		x -= 7;
 	}
-	if (stage == 5) {
+	if (stage == 4) {
 		imgIndex = 1;
 	}
 	if (stage == 7) {

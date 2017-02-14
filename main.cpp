@@ -35,7 +35,7 @@ SDL_Texture* getTexture(SDL_Renderer* rend, const std::string& filename) {
   }
 }
 
-void initGameObjects(std::vector<GameObject*>& gameObjects, Texture** textures) {
+void initGameObjects(std::vector<GameObject*>& gameObjects, std::vector<Texture*>& textures) {
 
   for (int i = 0; i < rain_count*2; i++) {
     gameObjects.push_back(new Rain(i*(WIDTH/rain_count), (rand()%HEIGHT), rand()%3+3, HEIGHT, 5));
@@ -133,15 +133,15 @@ int main( ) {
   SDL_Texture *lightning = getTexture(renderer, "images/lightning.png");
 
   //create texture wrappers
-  Texture* textures[10];
-  textures[0] = new Texture(building1, 300, 450);
-  textures[1] = new Texture(building2, 300, 450);
-  textures[2] = new Texture(rooftop, 640, 400);
-  textures[3] = new Texture(detective, 32, 64);
-  textures[4] = new Texture(criminal, 128, 64);
-  textures[5] = new Texture(dtext, 640, 100);
-  textures[6] = new Texture(ctext, 640, 100);
-  textures[7] = new Texture(lightning, 300, 300);
+  std::vector<Texture*> textures;
+  textures.push_back(new Texture(building1, 300, 450));
+  textures.push_back(new Texture(building2, 300, 450));
+  textures.push_back(new Texture(rooftop, 640, 400));
+  textures.push_back(new Texture(detective, 32, 64));
+  textures.push_back(new Texture(criminal, 128, 64));
+  textures.push_back(new Texture(dtext, 640, 100));
+  textures.push_back(new Texture(ctext, 640, 100));
+  textures.push_back(new Texture(lightning, 300, 300));
 
   SDL_Event event;
   const Uint8* keystate;
@@ -178,6 +178,8 @@ int main( ) {
       case 5: if (counter > 35) { stage++; counter = 0; } break;
       case 6: if (counter > 75) { stage++; counter = 0; } break;
       case 7: if (counter > 10) { stage++; counter = 0; } break;
+      case 8: if (counter > 122) { stage++; counter = 0; } break;
+      case 9: done = true; break;
     }
     counter++;
 
@@ -190,7 +192,7 @@ int main( ) {
     delete gameObjects[i];
   }
   SDL_DestroyTexture(background);
-  for (int i = 0; i < 8; i++) {
+  for (size_t i = 0; i < textures.size(); i++) {
     delete textures[i];
   }
 

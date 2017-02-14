@@ -3,8 +3,10 @@
 
 void StageObject::update(int stage) {
 	doDraw = (stage == drawStage);
-	x += rand()%3-1;
-	y += rand()%3-1;
+	if (doDraw) {
+		x += rand()%3-1;
+		y += rand()%3-1;	
+	}
 }
 
 void StageObject::draw(SDL_Renderer* render) {

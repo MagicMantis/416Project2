@@ -1,10 +1,12 @@
 #ifndef TEXTURE_H
 #define TEXTURE_H
 
+#include <iostream>
+
 class Texture {
 public:
 	Texture(SDL_Texture* i, int w, int h) : img(i), width(w), height(h) {}
-	~Texture() { SDL_DestroyTexture(img); }
+	~Texture() { std::cout << "Called that one" << std::endl; SDL_DestroyTexture(img); }
 
 	SDL_Texture* getImage() const { return img; }
 	int getWidth() const { return width; }

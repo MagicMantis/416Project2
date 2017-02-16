@@ -4,6 +4,11 @@
 #include "gameObject.h"
 #include "texture.h"
 
+/** 
+ * StageObject class: child of gameobject, these objects have
+ * a location, size, and texture, and are active only during
+ * a single stage of the animation.
+ */ 
 class StageObject : public GameObject {
 public:
 	StageObject(int xp, int yp, int w, int h, int ds, Texture* t) : 
@@ -13,9 +18,9 @@ public:
 	void update(int stage);
 	virtual void draw(SDL_Renderer* render);
 protected:
-	int x,y,width,height,drawStage;
-	bool doDraw;
-	Texture* texture;
+	int x,y,width,height,drawStage; //drawStage says which stage the object is active
+	bool doDraw; //should draw during the current frame
+	Texture* texture; //texture to draw
 
 	//disallow compiler generated constructors
 	StageObject();

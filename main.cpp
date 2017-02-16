@@ -25,25 +25,6 @@ void draw(SDL_Renderer* rend, TextureManager& tm, ObjectManager& om) {
   SDL_RenderPresent(rend);
 }
 
-void update(FrameGenerator& frameGen, bool makeVideo, ObjectManager& om, int stage) {
-
-  static unsigned int remainder = 0u; // ***
-  static unsigned int prevTicks = SDL_GetTicks();
-  unsigned int currentTicks = SDL_GetTicks();
-  unsigned int elapsedTicks = currentTicks - prevTicks + remainder; // ***
-
-  if( elapsedTicks < DT ) return;
-
-  // Generate a frame:
-  if ( makeVideo ) frameGen.makeFrame();
-
-  prevTicks = currentTicks;
-  remainder = elapsedTicks - DT; // ***
-
-  //update objects
-  om.updateObjects(stage);
-}
-
 int main( ) {
   //setup SDL
   SDL_Init(SDL_INIT_VIDEO);
@@ -73,6 +54,12 @@ int main( ) {
   //stage is the current step in the animation, counter is frame in current stage
   int stage = 0, counter = 0;
 
+  //frame limiting variables
+  unsigned int remainder = 0u; // ***
+  unsigned int startTime = SDL_GetTicks();
+  unsigned int prevTicks = startTime;
+  unsigned int frames = 0u;
+  
   while ( !done ) {
     //poll for input
     while ( SDL_PollEvent(&event)) {
@@ -87,6 +74,21 @@ int main( ) {
         makeVideo = true;
       }
     }
+
+    //calculate time past since last frame
+    unsigned int currentTicks = SDL_GetTicks();
+    unsigned int elapsedTicks = currentTicks - prevTicks + remainder; // ***
+
+    //if too soon, continue;
+    if( elapsedTicks < DT ) continue;
+    frames++; //increment frames for frame counter
+
+    //update prevTicks and remainder
+    prevTicks = currentTicks;
+    remainder = elapsedTicks - DT; // ***
+
+    // Generate a frame:
+    if ( makeVideo ) frameGen.makeFrame();
 
     //update game state to handle different stages of animation
     switch (stage) {
@@ -103,9 +105,13 @@ int main( ) {
     }
     counter++;
 
+    //update objects
+    om.updateObjects(stage);
     draw(renderer, tm, om);
-    update(frameGen, makeVideo, om, stage);
   }
+  //show framerate after program completes
+  unsigned int totalTicks = SDL_GetTicks() - startTime;
+  std::cout << "fps: " << frames / (totalTicks * .001) << std::endl;
 
   //cleanup
   SDL_DestroyRenderer(renderer);

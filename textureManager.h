@@ -17,15 +17,15 @@ public:
 	TextureManager() : textures() {}
 	~TextureManager();
 
-	Texture* getTexture(const std::string&) const;
-	SDL_Texture* getBackgroundTexture() const;
-	void initTextures(SDL_Renderer*);
+	Texture* getTexture(const std::string&) const; //request reference to texture 
+	SDL_Texture* getBackgroundTexture() const; //request reference to background
+	void initTextures(SDL_Renderer*); //load all textures from files
 private:
-	std::map<std::string, Texture*> textures;
-	SDL_Texture* background;
+	std::map<std::string, Texture*> textures; //map allow named access to texture pointers
+	SDL_Texture* background; //background texture reference
 
 	//internal functions
-	SDL_Texture* loadTexture(SDL_Renderer*, const std::string&);
+	SDL_Texture* loadTexture(SDL_Renderer*, const std::string&); //used to load a texture from a file
 };
 
 #endif
